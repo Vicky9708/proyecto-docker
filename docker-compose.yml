@@ -1,0 +1,44 @@
+# Orquesta los dos contenedores: base de datos + servidor web
+services:
+
+  db:
+    build: ./db                      # construye la imagen desde db/Dockerfile
+    image: tienda-mysql:1.0
+    container_name: tienda-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: tienda
+    ports:
+      - "3307:3306"                  # 3307 en tu PC -> 3306 en el contenedor
+    volumes:
+      - datos_mysql:/var/lib/mysql   # volumen = los datos NO se pierden
+    networks:
+      - red_tienda
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot123"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  web:
+    build: ./web                     # construye la imagen desde web/Dockerfile
+    image: tienda-web:1.0
+    container_name: tienda-web
+    environment:
+      DB_HOST: db                    # nombre del servicio = nombre en la red
+      DB_USER: root
+      DB_PASSWORD: root123
+      DB_NAME: tienda
+    ports:
+      - "3000:3000"                  # abre http://localhost:3000
+    depends_on:
+      db:
+        condition: service_healthy   # espera a que MySQL esté listo
+    networks:
+      - red_tienda
+
+volumes:
+  datos_mysql:
+
+networks:
+  red_tienda:
