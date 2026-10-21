@@ -33,3 +33,4 @@ Borrar todo, incluso los datos: `docker compose down -v`.
 
 ## Modelo entidad-relación
 `clientes (1) ───< (N) pedidos` mediante `pedidos.cliente_id → clientes.id`.
+# proyecto-docker
